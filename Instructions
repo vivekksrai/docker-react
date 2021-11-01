@@ -122,3 +122,27 @@ Required Travis Script Updates End
 
 
 Docker-env.eba-4xtda6s7.us-east-2.elasticbeanstalk.com 
+
+
+docker-react-travis-ci
+AKIAXUWASFNQIQGZBSWG
+
+gsGnnZHDODruEKoNLB13WQF2OnKf7JGE40lGKs1U
+
+
+
+[master d07eb23] added travis deploy config
+ Committer: VIVEK RAI <vivekrai@VIVEKs-Mac-mini.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 18 insertions(+), 4 deletions(-)

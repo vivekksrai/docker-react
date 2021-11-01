@@ -4,8 +4,8 @@ services:
   - docker
 
 before_install: # before we start to run our test what to do
-  - docker-compose -t vivekkrai/docker-react -f Dockerfile.dev up --build 
-  #- docker build -t vivekkrai/docker-react -f Dockerfile.dev .
+  #- docker-compose -t vivekkrai/docker-react -f Dockerfile.dev up --build 
+  - docker build -t vivekkrai/docker-react -f Dockerfile.dev .
 script:
   - docker run -e CI=true vivekkrai/docker-react npm run test -- --coverage
 deploy:
