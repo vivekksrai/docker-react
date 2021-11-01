@@ -2,3 +2,120 @@ docker run -it -p 3000:3000 IMAGE_ID
 
  web:
     stdin_open: true
+
+
+Agent pid 5318
+
+Replacement for the Travis CI Start
+============================================================================================================================================================================
+To replace Travis with Github Actions you can do the following:
+1. Delete your .travis.yml file from the local project.
+2. Navigate to your Github repository.
+3. Click Settings
+4. Click Secrets
+5. Click New repository secret
+6. Create key/value pair secrets for AWS_ACCESS_KEY, AWS_SECRET_KEY, DOCKER_USERNAME, DOCKER_PASSWORD.
+7. In your local development environment, create a .github directory at the root of your project
+8. Create a workflows directory inside the new .github directory
+9. In the workflows directory create a deploy.yaml file which should contain the following code (name does not matter):
+Important - remember to change your application_name, environment_name, existing_bucket_name and region to the values used by your AWS EBS environment:
+
+name: Deploy Frontend
+on:
+  push:
+    branches:
+      - main
+ 
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+      - run: docker build -t cygnetops/react-test -f Dockerfile.dev .
+      - run: docker run -e CI=true cygnetops/react-test npm test
+ 
+      - name: Generate deployment package
+        run: zip -r deploy.zip . -x '*.git*'
+ 
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v18
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
+          application_name: docker-gh
+          environment_name: Dockergh-env
+          existing_bucket_name: elasticbeanstalk-us-east-1-923445559289
+          region: us-east-1
+          version_label: ${{ github.sha }}
+          deployment_package: deploy.zip
+=================================================================================================================================================================================
+Replacemenet for Travis CI End 
+
+AWS Provisioning Steps for Docker Start
+=================================================================================================================================================================================
+This new AWS platform will conflict with the project we have built since it will look for a docker.compose.yml file to build from by default instead of a Dockerfile.
+
+To resolve this, please do the following:
+
+1. Rename the development Compose config file
+
+Rename the docker-compose.yml file to docker-compose-dev.yml. Going forward you will need to pass a flag to specify which compose file you want to build and run from: 
+docker-compose -f docker-compose-dev.yml up
+docker-compose -f docker-compose-dev.yml up --build
+docker-compose -f docker-compose-dev.yml down
+
+2. Create a production Compose config file
+
+Create a docker-compose.yml file in the root of the project and paste the following:
+
+version: '3'
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '80:80'
+AWS EBS will see a file named docker-compose.yml and use it to build the single container application.
+=================================================================================================================================================================================
+AWS Privisioning Step for Docker End
+
+
+
+Changes in Travis YML file Begin 
+=================================================================================================================================================================================
+In the upcoming lecture, we will be adding our AWS variables to the deploy script of the .travis.yml file. There is a slight change that will be required, otherwise, you will get an error when Travis attempts to run your code.
+
+The code will now look like this:
+
+access_key_id: $AWS_ACCESS_KEY
+secret_access_key: $AWS_SECRET_KEY
+=================================================================================================================================================================================
+Changes in Travis YML file End 
+
+
+Required Travis Script Updates Start
+=================================================================================================================================================================================
+In the upcoming lecture, we will be adding a script to our .travis.yml file. Due to a change in how the Jest library works with Create React App, we need to make a small modification:
+
+script:
+  - docker run USERNAME/docker-react npm run test -- --coverage
+ 
+instead should be:
+
+script:
+  - docker run -e CI=true USERNAME/docker-react npm run test
+Additionally, you may want to set the following property to the top of your .travis.yml file:
+
+language: generic 
+You can read up on the CI=true variable here:
+
+https://facebook.github.io/create-react-app/docs/running-tests#linux-macos-bash
+
+and environment variables in Docker here:
+
+https://docs.docker.com/engine/reference/run/#env-environment-variables
+
+=================================================================================================================================================================================
+Required Travis Script Updates End
