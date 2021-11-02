@@ -10,10 +10,10 @@ script:
   - docker run -e CI=true vivekkrai/docker-react npm run test -- --coverage
 deploy:
   provider: elasticbeanstalk
-  region: "us-west-1"
+  region: "us-east-2"
   app: "docker"
-  env: "Docker-env-1"
-  bucket_name: "elasticbeanstalk-us-west-1-525463595872"
+  env: "Docker-env"
+  bucket_name: "elasticbeanstalk-us-east-2-525463595872"
   bucket_path: "docker"
   on:
     branch: master
